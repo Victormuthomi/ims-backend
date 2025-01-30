@@ -27,8 +27,12 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app .
 
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose the port the app will use
 EXPOSE 5000
+# Switch to node user
+USER node
 
 # Set the command to run the application
 CMD ["npm", "run", "server"]
