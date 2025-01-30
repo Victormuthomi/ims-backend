@@ -7,11 +7,15 @@ WORKDIR /app
 # Copy only package.json and package-lock.json first to leverage Docker cache
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install dependencies (only production)
+RUN npm install --production && \
+    npm cache clean --force  # Clean npm cache to reduce size
 
-# Copy the application source code
+# Copy the application source code (only necessary files)
 COPY . .
+
+# Clean up any unnecessary files from node_modules
+RUN rm -rf node_modules/.cache  # Remove unnecessary cache from node_modules
 
 # Use a multi-stage build to create a smaller runtime image
 FROM node:18-alpine AS main
