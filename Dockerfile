@@ -31,5 +31,5 @@ COPY --from=build /app .
 EXPOSE 5000
 
 # Set the command to run the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "server"]
 
