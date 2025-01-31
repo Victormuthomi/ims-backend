@@ -1,24 +1,23 @@
-version: "3"
 services:
   backend:
-    build: .
-    container_name: mern-backend
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ims-backend
+    container_name: ims-backend
     environment:
-      - NODE_ENV=production
-    depends_on:
-      - mongo
-
-  mongo:
-    image: mongo
-    container_name: mern-mongo
+      - MONGO_URI=mongodb+srv://muthomi:muthomi@clusterinventory.ufnfd.mongodb.net/inventory?retryWrites=true&w=majority&appName=ClusterInventory
     ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+      - "8090:8090"
+    # depends_on:
+    # - "mongo"
 
-volumes:
-  mongo_data:
+  #mongo:
+  # image: mongo:latest
+  #container_name: ims-mongo
+  #volumes:
+  #  - mern-data:/data/db
+  #ports:
+  #  - "27017:27017"
+#volumes:
+# mern-data:

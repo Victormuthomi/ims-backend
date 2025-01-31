@@ -1,39 +1,30 @@
-# Use a lightweight base image
+# Stage 1: Build dependencies
 FROM node:18-alpine AS build
 
-# Set the working directory
 WORKDIR /app
 
-# Copy only package.json and package-lock.json first to leverage Docker cache
-COPY package*.json ./
+# Install production dependencies only
+COPY package.json package-lock.json ./
+RUN npm ci --production
 
-# Install dependencies (only production)
-RUN npm install --production && \
-    npm cache clean --force  # Clean npm cache to reduce size
-
-# Copy the application source code (only necessary files)
+# Copy source code (excluding unnecessary files using .dockerignore)
 COPY . .
 
-# Clean up any unnecessary files from node_modules
-RUN rm -rf node_modules/.cache  # Remove unnecessary cache from node_modules
+# Clean npm cache to reduce image size
+RUN npm cache clean --force
 
-# Use a multi-stage build to create a smaller runtime image
-FROM node:18-alpine AS main
+# Stage 2: Final image
+FROM node:18-alpine
 
-# Set the working directory
 WORKDIR /app
 
-# Copy only the necessary files from the build stage
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app .
+# Install only production dependencies in the final image
+COPY --from=build /app /app
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Remove unnecessary files and folders to reduce image size
+RUN rm -rf /app/tests /app/.git /app/.npm /app/node_modules/.cache
 
-# Expose the port the app will use
-EXPOSE 5000
-# Switch to node user
-USER node
+EXPOSE 8090
 
-# Set the command to run the application
-CMD ["npm", "run", "server"]
+CMD ["npm", "start"]
 
